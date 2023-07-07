@@ -6,8 +6,8 @@
   - name: Concatenate all CSV files into a single CSV file
     become: yes
     copy:
-      src: "/home/hr214/CSV-files/{{ item }}"
-      dest: "/home/hr214/CSV-files/{{ item }}"
+      src: "/path/CSV-files/{{ item }}"
+      dest: "/path/CSV-files/{{ item }}"
       mode: 0644
       remote_src: yes
     with_items:
@@ -15,11 +15,11 @@
 
   - name: Concatenate all CSV files
     shell: |
-      cat /home/hr214/CSV-files/*.csv > /home/hr214/CSV-files/output.csv
+      cat /path/CSV-files/*.csv > /path/CSV-files/output.csv
 
   - name: Move the output CSV file to the final destination
     copy:
-      src: "/home/hr214/CSV-files/output.csv"
+      src: "/path/CSV-files/output.csv"
       dest: "{{ output_file }}"
       mode: 0644
       remote_src: yes
@@ -29,4 +29,4 @@
     - addresses.csv 
     - family.csv
     - favourite-food.csv
-    output_file: /home/hr214/CSV-files/output.csv
+    output_file: /path/CSV-files/output.csv
