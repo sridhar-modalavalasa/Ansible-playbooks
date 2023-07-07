@@ -1,0 +1,41 @@
+- name: Install Tomcat Application
+  hosts: myserver1
+  become: yes
+  become_user: root
+  tasks:
+  - name: Check if Tomcat is already installed
+    stat:
+      path: /opt/tomcat
+    register: tomcat_installed
+    become: yes
+
+  - block:
+    - name: Download Tomcat tarball
+      get_url:
+        url: "http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.50/bin/apache-tomcat-9.0.50.tar.gz"
+        dest: "/tmp/tomcat.tar.gz"
+      when: not tomcat_installed.stat.exists
+      become: yes
+
+    - name: Extract Tomcat tarball
+      unarchive:
+        src: "/tmp/tomcat.tar.gz"
+        dest: "/opt"
+        remote_src: yes
+      when: not tomcat_installed.stat.exists
+      become: yes
+
+    - name: Rename Tomcat directory
+      command: mv /opt/apache-tomcat-9.0.50 /opt/tomcat
+      when: not tomcat_installed.stat.exists
+      become: yes
+
+    - name: Set permissions for Tomcat directory
+      file:
+        path: /opt/tomcat
+        owner: tomcat
+        group: tomcat 
+        mode: "0755"
+      when: not tomcat_installed.stat.exists
+      become: yes
+    

@@ -1,0 +1,44 @@
+- name: Install and Configure Nginx and vsftpd
+  hosts: myserver1
+  become: true
+  become_user: root
+  gather_facts: false
+
+  vars:
+    nginx_installed: false
+    vsftpd_installed: false
+
+  tasks:
+  - name: Install Nginx
+    yum:
+      name: nginx
+      state: present
+    when: nginx_installed == false
+
+  - name: Start Nginx
+    service:
+      name: nginx
+      state: started
+    when: nginx_installed == false 
+
+  - name: Set Nginx installation status
+    set_fact:
+      nginx_installed: true
+    when: nginx_installed == false
+
+  - name: Install vsftpd
+    yum:
+      name: vsftpd
+      state: present
+    when: nginx_installed == true and vsftpd_installed == false
+
+  - name: Start vsftpd
+    service:
+      name: vsftpd
+      state: started
+    when: nginx_installed == true and vsftpd_installed == false
+
+  - name: Set vsftpd installation status
+    set_fact:
+      vsftpd_installed: true
+    when: nginx_installed == true and vsftpd_installed == false

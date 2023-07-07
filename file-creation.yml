@@ -1,0 +1,12 @@
+- name: file creation
+  hosts: myserver1
+  become: yes
+  become_user: root
+  vars:
+    file_name: /tmp/my-version.txt
+  tasks:
+  - name: Create file
+    ansible.builtin.file:
+      path: "{{ file_name }}"
+      state: touch
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version in ['7', '8']

@@ -1,0 +1,13 @@
+- name: Configure nginx web server
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: install nginx server
+    yum:
+      name: httpd
+      state: latest
+  - name: start nginx server
+    service:
+      name: httpd
+      state: started

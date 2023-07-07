@@ -1,0 +1,19 @@
+- name: Configure httpd web server
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: install httpd server
+    yum:
+      name: httpd
+      state: latest
+  - name: start httpd server
+    service:
+      name: httpd
+      state: started
+  - name: Insert a line at the end of the file
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      insertafter: EOF
+      line: "Listen 443"
+      state: present

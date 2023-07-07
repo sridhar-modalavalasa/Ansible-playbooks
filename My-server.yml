@@ -1,0 +1,35 @@
+- name: Installtion server and verifying the status before the installation
+  hosts: myserver1
+  become: yes
+  become_user: root
+  vars:
+    nginx_package: nginx
+
+  tasks:
+  - name: Check if nginx is installed
+    stat:
+      path: /usr/sbin/nginx
+    register: nginx_installed
+    ignore_errors: true
+
+  - name: Install nginx prerequisites
+    yum:
+      name:
+      - gcc
+      - make
+      - pcre-devel
+      - zlib-devel
+      state: present
+    when: nginx_installed.stat.exists == false 
+
+  - name: Install nginx
+    yum:
+      name: "{{ nginx_package }}"
+      state: present
+    when: nginx_installed.stat.exists == false and ansible_distribution in ['RedHat', 'CentOS']
+  
+  - name: start nginx server
+    service:
+      name: "{{ nginx_package }}" 
+      state: started
+

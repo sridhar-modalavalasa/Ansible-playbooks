@@ -1,0 +1,13 @@
+---
+- name: Error handling for the task 
+  become: true 
+  become_user: root 
+  hosts: myserver1 
+  tasks:
+    - name: Run a command that will always fail
+      command: /bin/false
+      ignore_errors: true 
+      register: failed 
+    - debug: 
+        msg: "Playbook interrupted"
+      

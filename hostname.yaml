@@ -1,0 +1,10 @@
+- name: Print hostname
+  hosts: myserver1
+  vars:
+    my_hostname: "{{ ansible_hostname }}"
+  tasks:
+  - name: Display hostname
+    debug:
+      msg: "{{ my_hostname }}"
+
+

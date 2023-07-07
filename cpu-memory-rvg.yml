@@ -1,0 +1,25 @@
+- name: Check system information on CentOS server
+  hosts: myserver1
+  become: true
+  become_user: root
+  gather_facts: true
+  tasks:
+  - name: Display CPU information
+    ansible.builtin.debug:
+      msg: "Number of CPUs: {{ ansible_processor_count }}"
+
+  - name: Display total memory
+    ansible.builtin.debug:
+      msg: "Total memory installed: {{ ansible_memtotal_mb }} MB"
+
+  - name: Check available rootvg volume
+    command: df -h / | awk 'NR==2{print $4}'
+    register: rootvg_size
+    changed_when: false
+    failed_when: false
+    check_mode: no
+
+  - name: Display available rootvg volume
+    ansible.builtin.debug:
+      msg: "Available rootvg volume: {{ rootvg_size.stdout }}"
+

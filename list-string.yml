@@ -1,0 +1,18 @@
+- name: List to String Conversion
+  hosts: myserver1
+  become: true 
+  become_user: root  
+  vars:
+    my_list: ['Jenkins', 'Kubernetes', 'Ansible']
+    my_string: "Terraform,ELKStack,Prometheus" 
+  tasks:
+    - name: Concatenate a list to string
+      set_fact:
+        my_list_string: "{{ my_list | join(' ') }}"
+    - debug:
+        msg: "{{ my_list_string }}"
+    - name: Coverting string in to list 
+      set_fact: 
+        my_string_list: "{{my_string.split(',')}}"
+    - debug: 
+        msg: "{{my_string_list}}"

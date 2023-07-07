@@ -1,0 +1,15 @@
+- name: Checking the Nodejs application request 
+  hosts: localhost 
+  become: true 
+  become_user: hr214 
+  tasks:
+    - name: Check if Nodejs application is up 
+      uri:
+        url: http://192.168.3.152:1337/
+        method: GET
+        return_content: yes
+      register: Nodejs_status
+
+    - name: Print the status code of Nodejs 
+      debug:
+        msg: "{{ Nodejs_status.content }}"

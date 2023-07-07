@@ -1,0 +1,21 @@
+- name: Configure httpd web server
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: install httpd server
+    yum:
+      name: httpd
+      state: latest
+  - name: start httpd server
+    service:
+      name: httpd
+      state: started
+  - name: Replace a line with new line for a file
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: "LogLevel warn"
+      line: "LogLevel debug"
+      state: present
+      backup: yes
+

@@ -1,0 +1,25 @@
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Check if host is reachable
+      ping:
+      register: ping_result
+      ignore_errors: yes
+
+    - name: Add unreachable hosts to list
+      set_fact:
+        unreachable_hosts: "{{ hostvars[inventory_hostname]['ansible_play_hosts_all'] | difference(play_hosts) }}"
+      when: ping_result is failed
+      run_once: true
+
+    - name: Create CSV file with host information
+      delegate_to: localhost
+      blockinfile:
+        path: /home/hr214/hosts.csv
+        create: yes
+        block: |
+          Hostname,IPAddress,Host_Distribution,Distribution_Version
+          {% for host in unreachable_hosts %}
+          {{ host }},{{ hostvars[host]['ansible_default_ipv4']['address'] }},{{ hostvars[host]['ansible_distribution'] }},{{ hostvars[host]['ansible_distribution_version'] }}
+          {% endfor %}
+      when: ping_result is failed

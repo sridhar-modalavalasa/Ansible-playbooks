@@ -1,0 +1,37 @@
+- name: Checking the CPU,Memory,LVM
+  hosts: myserver1
+  gather_facts: yes 
+  become: true
+  become_user: root
+  tasks:
+    - name: Check CPU cores
+      assert:
+        that: ansible_processor_vcpus > 2
+        fail_msg: "CPU cores must be greater than 2"
+      when: ansible_processor_vcpus > 2 
+    - debug:
+        msg:
+          - "Hostname: {{ ansible_hostname }}"
+          - "IP Address: {{ ansible_default_ipv4.address }}"
+    - name: Check total memory
+      assert:
+        that: ansible_memtotal_mb > 3096
+        fail_msg: "Total memory must be greater than 4GB"
+      when: ansible_memtotal_mb > 3096 
+    - debug:
+        msg:
+          - "Hostname: {{ ansible_hostname }}"
+          - "IP Address: {{ ansible_default_ipv4.address }}"  
+    - name: Get available vgs with Lvm 
+      shell: "df -h --output=size / | tail -n 1 | awk '{ print $1 }'"
+      register: logical_volume_size
+    - name: Assert logical volume size
+      assert:
+        that: logical_volume_size.stdout > 2048
+        fail_msg: "Available logical volume size must be greater than 2GB"
+
+    - name: Display hostname and IP address
+      debug:
+        msg:
+          - "Hostname: {{ ansible_hostname }}"
+          - "IP Address: {{ ansible_default_ipv4.address }}"

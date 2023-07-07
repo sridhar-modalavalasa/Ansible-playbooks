@@ -1,0 +1,39 @@
+---
+- name: fetching the Ip address and Hostname 
+  hosts: myserver1 
+  gather_facts: yes
+  become: true 
+  become_user: root 
+  tasks:
+    - name: Get hostname
+      debug:
+        var: ansible_hostname
+    
+    - name: Get IP address
+      debug:
+        var: ansible_eth0.ipv4.address
+    
+    - name: Check CPU cores
+      debug:
+        var: ansible_processor_count
+    
+    - name: Check total memory
+      debug:
+        var: ansible_memtotal_mb
+    
+    - name: Check available rootvg volume
+      command: df -h / | awk 'NR==2{print $4}'
+      register: rootvg_size
+      changed_when: false
+      failed_when: false
+      check_mode: no
+    - debug: 
+        msg: "{{rootvg_size.stdout}}"
+    
+    - name: Display hostname and IP address if conditions are met
+      debug:
+        msg: "Hostname: {{ ansible_hostname }}, IP: {{ ansible_eth0.ipv4.address }}"
+      when:
+        - ansible_processor_count > 2
+        - ansible_memtotal_mb > 4096
+        - rootvg_size.stdout > 2048

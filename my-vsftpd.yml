@@ -1,0 +1,23 @@
+- name: Configure vsftpd
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Install vsftpd package in CentOS 7
+    yum:
+      name: vsftpd
+      state: latest
+  - name: Start and Enable vsftpd service
+    become: yes
+    systemd:
+      name: vsftpd
+      state: restarted
+      enabled: yes
+  - name: Status of Service
+    shell: "systemctl status vsftpd"
+    register: status
+
+  - name: printing variable
+    debug:
+      msg: "{{status}}"
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'

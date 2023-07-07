@@ -1,0 +1,19 @@
+- name: Calculate Disk Size
+  hosts: myserver1 
+  become: true 
+  become_user: root 
+  gather_facts: true
+
+  tasks:
+    - name: Get Disk Size
+      ansible.builtin.shell: |
+        df -h /
+      register: disk_size_output
+
+    - name: Parse Disk Size
+      ansible.builtin.set_fact:
+        disk_size: "{{ disk_size_output.stdout_lines[1].split()[1] }}"
+
+    - name: Display Disk Size
+      ansible.builtin.debug:
+        var: disk_size

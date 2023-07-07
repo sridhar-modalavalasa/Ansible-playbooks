@@ -1,0 +1,40 @@
+- name: Install node and npm
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Update yum repo and cache
+    yum: update_cache=yes
+  - name: Install nodejs and npm
+    yum:
+      name:
+      - nodejs
+      - npm
+
+- name: Deploy nodejs app
+  hosts: myserver1
+  vars_files:
+    - project-vars 
+  tasks:
+  - name: Unpack the nodejs file
+    unarchive:
+      src: "{{location}}"
+      dest: "{{destination}}"
+      remote_src: yes
+  - name: Install Dependencies
+    npm:
+      path: "{{destination}}/{{directory}}/"
+  - name: Start the application
+    command:
+      chdir: "{{destination}}/{{directory}}/"
+      cmd: node app
+    async: 1000
+    poll: 0
+  - name: Ensure that app is running
+    shell: ps aux | grep node
+    register: app_status
+  - debug:
+      msg: "{{app_status.stdout_lines}}"
+
+
+

@@ -1,0 +1,30 @@
+- name: Check if the system needs a reboot
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Check if server needs reboot
+    command: /usr/bin/needs-restarting
+    register: checkrestart_results
+
+  - name: Display message if server needs reboot
+    when: checkrestart_results.stdout.find('Reboot required') != -1
+    vars:
+      hostname: "{{ ansible_hostname }}"
+      host_distribution: "{{ ansible_distribution }}"
+    shell: |
+      echo "'{{ hostname }}' of '{{ host_distribution }}' needs Reboot"
+    register: need_reboot
+  - debug:
+      msg: "{{need_reboot}}"
+
+  - name: Display message if server does not need reboot
+    when: checkrestart_results.stdout.find('Reboot required') == -1
+    vars:
+      hostname: "{{ ansible_hostname }}"
+      host_distribution: "{{ ansible_distribution }}"
+    shell: |
+      echo "'{{ hostname }}' of '{{ host_distribution }}' need not Reboot"
+    register: Dont_need_reboot
+  - debug:
+      msg: "{{Dont_need_reboot.stdout_lines}}"

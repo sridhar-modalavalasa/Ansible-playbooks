@@ -1,0 +1,26 @@
+- name: Getting the free space from various locations
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Get the available free space on /opt
+    ansible.builtin.shell: df -h /opt
+    register: opt_free_space
+    changed_when: false
+  - name: Get the available free space on /var
+    ansible.builtin.shell: df -h /var
+    register: var_free_space
+    changed_when: false
+  - name: Get the available free space on /etc
+    ansible.builtin.shell: df -h /etc
+    register: etc_free_space
+    changed_when: false
+  - name: Print the available free space on /opt
+    debug:
+      var: opt_free_space.stdout_lines[1].split()[3]
+  - name: Print the available free space on /var
+    debug:
+      var: var_free_space.stdout_lines[1].split()[3]
+  - name: Print the available free space on /etc
+    debug:
+      var: etc_free_space.stdout_lines[1].split()[3]

@@ -1,0 +1,22 @@
+- name: Checking the CPU,Memory,LVM
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Get number of CPUs
+    shell: "cat /proc/cpuinfo | grep 'processor' | wc -l"
+    register: cpu_count
+  - debug: 
+      msg: "{{cpu_count.stdout_lines}}"
+
+  - name: Get total memory installed
+    shell: "free -h | grep Mem | awk '{print $2}'"
+    register: total_memory
+  - debug: 
+      msg: "{{total_memory.stdout_lines}}" 
+
+  - name: Get available vgs with Lvm 
+    shell: "df -h --output=size / | tail -n 1 | awk '{ print $1 }'"
+    register: lvm_available
+  - debug:
+      msg: "{{lvm_available.stdout_lines}}"

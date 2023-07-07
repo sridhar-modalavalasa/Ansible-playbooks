@@ -1,0 +1,188 @@
+- name: Update and install Java
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Update the system
+    yum:
+      name: '*'
+      state: latest
+      update_cache: yes
+    become: yes
+
+  - name: Install Java
+    yum:
+      name:
+      - java-1.8.0-openjdk
+      - java-1.8.0-openjdk-devel
+      state: present
+    become: yes
+
+- name: Download and Unpack changes
+  hosts: myserver1
+  become: yes
+  become_user: root
+  tasks:
+  - name: Checks if nexus folder already exists.
+    stat:
+      path: /opt/nexus/
+    register: state_result
+  - debug:
+      msg: "{{state_result.stat.exists}}"
+
+  - name: Download nexus
+    get_url:
+      url: https://download.sonatype.com/nexus/3/nexus-3.42.0-01-unix.tar.gz
+      dest: /opt/
+  - name: Untar nexus
+    unarchive:
+      src: /opt/nexus-3.42.0-01-unix.tar.gz
+      dest: /opt/
+      remote_src: yes
+    when: not state_result.stat.exists
+
+  - name: Find nexus folder
+    find:
+      paths: /opt/
+      pattern: "nexus-*"
+      file_type: directory
+    register: find_result
+  - debug:
+      msg: "{{find_result}}"
+
+  - name: Display directory listing
+    become: yes
+    command: ls -lh
+    args:
+      chdir: /opt
+
+  - name: Rename Nexus directory
+    become: yes
+    command: mv nexus-3.42.0-01 nexus
+    args:
+      chdir: /opt
+
+  - name: Rename sonatype-work directory
+    become: yes
+    command: mv sonatype-work nexusdata
+    args:
+      chdir: /opt
+
+
+- name: Create nexus user to our own nexus group
+  hosts: myserver1
+  become: yes
+  become_user: root
+  tasks:
+  - name: Ensure group nexus exists
+    group:
+      name: nexus
+      state: present
+  - name: Create nexus user
+    user:
+      name: nexus
+      group: nexus
+  - name: Make nexus user owner of Nexus
+    become: true
+    file:
+      path: /opt/nexus
+      state: directory
+      owner: nexus
+      group: nexus
+      recurse: yes
+  - name: Make nexus user owner of nexusdata
+    become: true
+    file:
+      path: /opt/nexusdata
+      state: directory
+      owner: nexus
+      group: nexus
+      recurse: yes
+
+- name: Configure Nexus nofile Limit
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Update limits.conf File
+    lineinfile:
+      path: /etc/security/limits.conf
+      line: "nexus - nofile 65536"
+      state: present
+      regex: '^nexus\s+-\s+nofile'
+
+- name: Creating Nexus service file empty
+  hosts: myserver1
+  become: true
+  tasks:
+  - name: Create empty file
+    file:
+      path: /etc/systemd/system/nexus.service
+      state: touch
+
+- name: Configure Nexus Service
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Create Nexus Service File
+    blockinfile:
+      path: /etc/systemd/system/nexus.service
+      block: |
+        [Unit]
+        Description=Nexus Service
+        After=syslog.target network.target
+
+        [Service]
+        Type=forking
+        LimitNOFILE=65536
+        ExecStart=/opt/nexus/bin/nexus start
+        ExecStop=/opt/nexus/bin/nexus stop
+        User=nexus
+        Group=nexus
+        Restart=on-failure
+
+        [Install]
+        WantedBy=multi-user.target
+
+- name: Manage Nexus Service
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Reload systemd daemon
+    systemd:
+      daemon_reload: yes
+
+  - name: Enable Nexus service
+    systemd:
+      name: nexus.service
+      enabled: yes
+      state: started
+
+- name: Configure Nexus run_as_user
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Update Nexus rc File
+    lineinfile:
+      path: /opt/nexus/bin/nexus.rc
+      regexp: '^#run_as_user=""'
+      line: run_as_user="nexus"
+  - name: start nexus
+    command: /opt/nexus/bin/nexus start
+
+- name: Verify nexus server running
+  hosts: myserver1
+  tasks:
+  - name: check with the ps
+    shell: ps aux | grep nexus
+    register: app_status
+  - debug:
+      msg: "{{app_status.stdout_lines}}"
+  - name: check with the netstat
+    shell: netstat -plnt
+    register: app_status
+  - debug:
+      msg: "{{app_status.stdout_lines}}"

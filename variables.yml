@@ -1,0 +1,16 @@
+- name: Variables utilisation
+  hosts: myserver1
+  become: true
+  become_user: root
+  vars:
+    message: "Hello, world!"
+  tasks:
+  - name: Print the message
+    debug: 
+      msg: "{{message}}"
+  - name: Change the message
+    set_fact:
+      message: "Goodbye, world!"
+  - name: Print the new message
+    debug: 
+      msg: "{{message}}"

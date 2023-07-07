@@ -1,0 +1,24 @@
+- hosts: all
+  become: true 
+  become_user: root 
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+      when: inventory_hostname in groups["myserver1"]
+    - name: Start Nginx   
+      service:
+        name: nginx
+        state: started  
+      when: inventory_hostname in groups["myserver1"]
+    - name: Install vsftpd 
+      yum:
+        name: vsftpd 
+        state: present 
+      when: inventory_hostname in groups["mywebserver1"]
+    - name: Start vsftpd   
+      service:
+        name: vsftpd 
+        state: started  
+      when: inventory_hostname in groups["mywebserver1"]

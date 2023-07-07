@@ -1,0 +1,17 @@
+- name: Configure nginx web server
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Stop nginx service
+    service:
+      name: nginx
+      state: stopped
+  - name: Remove nginx package
+    yum:
+      name: nginx
+      state: absent
+  - name: Remove nginx configuration files
+    file:
+      path: /etc/nginx/*
+      state: absent

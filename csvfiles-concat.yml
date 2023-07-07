@@ -1,0 +1,32 @@
+- name: Concatenation of CSV files
+  hosts: myserver1
+  become: true
+  become_user: hr214
+  tasks:
+  - name: Concatenate all CSV files into a single CSV file
+    become: yes
+    copy:
+      src: "/home/hr214/CSV-files/{{ item }}"
+      dest: "/home/hr214/CSV-files/{{ item }}"
+      mode: 0644
+      remote_src: yes
+    with_items:
+    - "{{ csv_files }}"
+
+  - name: Concatenate all CSV files
+    shell: |
+      cat /home/hr214/CSV-files/*.csv > /home/hr214/CSV-files/output.csv
+
+  - name: Move the output CSV file to the final destination
+    copy:
+      src: "/home/hr214/CSV-files/output.csv"
+      dest: "{{ output_file }}"
+      mode: 0644
+      remote_src: yes
+
+  vars:
+    csv_files:
+    - addresses.csv 
+    - family.csv
+    - favourite-food.csv
+    output_file: /home/hr214/CSV-files/output.csv

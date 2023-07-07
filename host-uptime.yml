@@ -1,0 +1,17 @@
+- name: fetching the hostname and server uptime details
+  hosts: myserver1
+  become: true
+  become_user: root
+  tasks:
+  - name: Check if hostname starts with "hr"
+    set_fact:
+      hostname_check: "{{ ansible_hostname.startswith('hr')  }}"
+  - name: Display uptime and FQDN if hostname starts with "hr"
+    when: hostname_check
+    debug:
+      msg: "Uptime: {{ ansible_uptime_seconds }} | FQDN: {{ ansible_fqdn }}"
+
+  - name: Display debug message if hostname does not start with "hr"
+    when: not hostname_check
+    debug:
+      msg: "This is an Application server"
