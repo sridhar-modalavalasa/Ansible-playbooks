@@ -1,12 +1,12 @@
 - name: Create and Remove Files
   hosts: myserver1
   become: true
-  become_user: hr214
+  become_user: user
   gather_facts: false
   tasks:
   - name: Create file
     file:
-      path: /home/hr214/Kubernetes.txt
+      path: <your path>/Kubernetes.txt
       state: touch
     register: create_result
 
@@ -16,7 +16,7 @@
 
   - name: Remove file
     file:
-      path: /home/hr214/name.json
+      path: <your path>/name.json
       state: absent
     register: remove_result
 
