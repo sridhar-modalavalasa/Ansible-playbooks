@@ -15,7 +15,7 @@
     - name: Create CSV file with host information
       delegate_to: localhost
       blockinfile:
-        path: /home/hr214/hosts.csv
+        path: <path>/hosts.csv
         create: yes
         block: |
           Hostname,IPAddress,Host_Distribution,Distribution_Version
