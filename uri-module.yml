@@ -5,7 +5,7 @@
   tasks:
     - name: Check if Nodejs application is up 
       uri:
-        url: http://192.168.3.152:1337/
+        URL: <website Ip>
         method: GET
         return_content: yes
       register: Nodejs_status
