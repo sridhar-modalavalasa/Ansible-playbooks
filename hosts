@@ -1,7 +1,5 @@
 [Unreachable_hosts]
-192.168.2.231
-192.168.1.213
-192.168.3.118
+<your Ip>
 
 [myserver1]
-192.168.2.61 ansible_user=hr214 
+<your Ip> ansible_user=<your user>
